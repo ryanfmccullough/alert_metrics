@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use alert_metrics, please cite it as below. A Zenodo DOI is added at each tagged release."
+type: software
+title: "alert_metrics: event-level evaluation of continuous early-warning scores"
+version: 0.1.0
+date-released: 2026-10-28
+license: MIT
+repository-code: "https://github.com/ryanfmccullough/alert_metrics"
+authors:
+  - family-names: McCullough
+    given-names: Ryan F.
+    orcid: "https://orcid.org/0009-0005-4107-1408"
+keywords:
+  - early warning
+  - alarm burden
+  - warning time
+  - calibration
+  - operating points
