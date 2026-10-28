@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 
 from alert_metrics import apply_refractory, persistence_mask, refractory_mask, threshold_alerts
+from alert_metrics.refractory import run_lengths
 
 
 def test_refractory_mask_hand_case():
@@ -63,3 +64,33 @@ def test_threshold_alerts_with_nan_and_persistence():
     assert al2["time"].tolist() == [3.0]  # NaN breaks the run at 1.0
     al3 = threshold_alerts(scores, threshold=0.5, refractory=2.0)
     assert al3["time"].tolist() == [0.0, 3.0]  # 2.0 is inside (0, 2]
+
+
+def test_run_lengths_matches_loop_and_resets_at_subject_boundaries():
+    rng = np.random.default_rng(5)
+    above = rng.random(5000) < 0.7
+    ref = np.zeros(above.size, dtype=int)
+    cur = 0
+    for i, a in enumerate(above):
+        cur = cur + 1 if a else 0
+        ref[i] = cur
+    assert np.array_equal(run_lengths(above), ref)
+    first = np.zeros(above.size, dtype=bool)
+    first[[0, 10, 11, 2500]] = True
+    out = run_lengths(above, first)
+    assert out[10] == int(above[10]) and out[11] == int(above[11]) and out[2500] == int(above[2500])
+    assert np.array_equal(out[:10], ref[:10])
+
+
+def test_threshold_alerts_persistence_does_not_cross_subjects():
+    scores = pd.DataFrame(
+        {
+            "subject": ["A", "A", "A", "B", "B", "B"],
+            "time": [0.0, 1.0, 2.0, 0.0, 1.0, 2.0],
+            "score": [0.9, 0.9, 0.9, 0.9, 0.1, 0.9],
+        }
+    )
+    al = threshold_alerts(scores, 0.5, persistence=2)
+    assert al.values.tolist() == [["A", 1.0], ["A", 2.0]]
+    al3 = threshold_alerts(scores, 0.5, persistence=3)
+    assert al3.values.tolist() == [["A", 2.0]]

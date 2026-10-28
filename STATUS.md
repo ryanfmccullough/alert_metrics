@@ -7,10 +7,10 @@ Last updated 2026-10-28.
 - Input conventions (`alerts`, `events`, `observation`) with validation and observation masks.
 - Alarm burden: alerts per 100 patient-days with interval merging; per-subject rates.
 - Event matching: true/false alerts, detected events, warning time per event, nearest-upcoming-event attribution.
-- Refractory and persistence rules; `threshold_alerts` turns a score table into an alert table.
+- Refractory and persistence rules; `threshold_alerts` turns a score table into an alert table. Persistence runs are computed in vectorised form (`run_lengths`), with resets at subject boundaries: six million samples in well under a second.
 - Calibration: reliability bins, ECE, Brier with Murphy decomposition, Cox slope and intercept.
 - Operating-point table over thresholds and selectors (sensitivity floor, alert budget, PPV at floor).
-- 34 tests on hand-checkable cases and synthetic streams. `ruff check` and `ruff format` clean.
+- 36 tests on hand-checkable cases and synthetic streams. `ruff check` and `ruff format` clean.
 
 ## Open
 
