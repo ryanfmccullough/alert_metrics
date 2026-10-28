@@ -78,12 +78,28 @@ def persistence_mask(above: np.ndarray, k: int) -> np.ndarray:
         raise ValueError("k must be >= 1")
     if k == 1 or above.size == 0:
         return above.copy()
-    run = np.zeros(above.size, dtype=int)
-    cur = 0
-    for i, a in enumerate(above):
-        cur = cur + 1 if a else 0
-        run[i] = cur
-    return run >= k
+    return run_lengths(above) >= k
+
+
+def run_lengths(above: np.ndarray, first_of_group: np.ndarray | None = None) -> np.ndarray:
+    """Length of the run of True values ending at each position (0 where False).
+
+    Vectorised: with ``cs`` the cumulative count of True values, the run at a
+    position is ``cs`` minus ``cs`` at the last reset, where a reset is a
+    False value or, when ``first_of_group`` is given, the first sample of a
+    subject. Runs never cross a subject boundary.
+    """
+    above = np.asarray(above, dtype=bool)
+    n = above.size
+    if n == 0:
+        return np.zeros(0, dtype=np.int64)
+    cs = np.cumsum(above, dtype=np.int64)
+    base = np.where(above, 0, cs)
+    if first_of_group is not None:
+        first = np.asarray(first_of_group, dtype=bool)
+        base = np.where(first, cs - above.astype(np.int64), base)
+    base = np.maximum.accumulate(base)
+    return cs - base
 
 
 def threshold_alerts(
@@ -104,9 +120,13 @@ def threshold_alerts(
     )
     s = sc[cols.score].to_numpy(dtype=float)
     above_all = np.where(np.isnan(s), False, s >= threshold)
-    fire = np.zeros(len(sc), dtype=bool)
-    for idx in sc.groupby(cols.subject, sort=False).indices.values():
-        fire[idx] = persistence_mask(above_all[idx], persistence)
+    if persistence == 1:
+        fire = above_all
+    else:
+        subj = sc[cols.subject].to_numpy()
+        first = np.ones(len(sc), dtype=bool)
+        first[1:] = subj[1:] != subj[:-1]
+        fire = run_lengths(above_all, first) >= persistence
     alerts = sc.loc[fire, [cols.subject, cols.time]].reset_index(drop=True)
     return apply_refractory(alerts, refractory, cols)
 
@@ -115,5 +135,6 @@ __all__ = [
     "apply_refractory",
     "persistence_mask",
     "refractory_mask",
+    "run_lengths",
     "threshold_alerts",
 ]
