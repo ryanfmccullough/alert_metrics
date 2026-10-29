@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from alert_metrics import apply_refractory, persistence_mask, refractory_mask, threshold_alerts
-from alert_metrics.refractory import run_lengths
+from alert_metrics.refractory import is_sorted_by_subject_time, run_lengths
 
 
 def test_refractory_mask_hand_case():
@@ -94,3 +94,24 @@ def test_threshold_alerts_persistence_does_not_cross_subjects():
     assert al.values.tolist() == [["A", 1.0], ["A", 2.0]]
     al3 = threshold_alerts(scores, 0.5, persistence=3)
     assert al3.values.tolist() == [["A", 2.0]]
+
+
+def test_sorted_fast_path_matches_sorting():
+    rng = np.random.default_rng(7)
+    n = 20000
+    scores = pd.DataFrame(
+        {
+            "subject": rng.integers(0, 50, n),
+            "time": rng.uniform(0, 500, n),
+            "score": rng.random(n),
+        }
+    )
+    unsorted = threshold_alerts(scores, 0.97, refractory=3.0, persistence=2)
+    pre = scores.sort_values(["subject", "time"], kind="stable").reset_index(drop=True)
+    assert is_sorted_by_subject_time(pre)
+    assert not is_sorted_by_subject_time(scores)
+    assert not is_sorted_by_subject_time(scores.assign(subject=scores["subject"].astype(str)))
+    pd.testing.assert_frame_equal(
+        threshold_alerts(pre, 0.97, refractory=3.0, persistence=2), unsorted
+    )
+    assert is_sorted_by_subject_time(pd.DataFrame({"subject": [1], "time": [0.0], "score": [0.5]}))

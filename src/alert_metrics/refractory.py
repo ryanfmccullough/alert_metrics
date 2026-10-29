@@ -102,6 +102,26 @@ def run_lengths(above: np.ndarray, first_of_group: np.ndarray | None = None) -> 
     return cs - base
 
 
+def is_sorted_by_subject_time(table: pd.DataFrame, cols: Columns = DEFAULT_COLUMNS) -> bool:
+    """True when numeric subject ids are ascending and times ascend within each subject.
+
+    A linear check that lets callers who evaluate many thresholds on one
+    pre-sorted score table skip a full sort per call. Tables with
+    non-numeric subject ids report False and are sorted as before.
+    """
+    if len(table) < 2:
+        return True
+    subj = table[cols.subject].to_numpy()
+    if subj.dtype.kind not in "iuf":
+        return False
+    t = table[cols.time].to_numpy(dtype=float)
+    d = np.diff(subj)
+    if np.any(d < 0):
+        return False
+    same = d == 0
+    return not np.any(t[1:][same] < t[:-1][same])
+
+
 def threshold_alerts(
     scores: pd.DataFrame,
     threshold: float,
@@ -115,9 +135,9 @@ def threshold_alerts(
     ``persistence`` consecutive samples, subject to a refractory period.
     Samples with NaN scores never fire and break persistence runs.
     """
-    sc = scores[[cols.subject, cols.time, cols.score]].sort_values(
-        [cols.subject, cols.time], kind="stable"
-    )
+    sc = scores[[cols.subject, cols.time, cols.score]]
+    if not is_sorted_by_subject_time(sc, cols):
+        sc = sc.sort_values([cols.subject, cols.time], kind="stable")
     s = sc[cols.score].to_numpy(dtype=float)
     above_all = np.where(np.isnan(s), False, s >= threshold)
     if persistence == 1:
@@ -133,6 +153,7 @@ def threshold_alerts(
 
 __all__ = [
     "apply_refractory",
+    "is_sorted_by_subject_time",
     "persistence_mask",
     "refractory_mask",
     "run_lengths",
