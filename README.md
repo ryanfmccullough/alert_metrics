@@ -11,6 +11,7 @@ A risk score is not an alert system. Between the two sit a threshold, a refracto
 - **Score to alerts**: threshold crossing with a refractory period (silence after an alert) and a persistence rule (k consecutive samples above threshold) (`refractory.py`).
 - **Calibration**: reliability bins, expected calibration error, Brier score with the Murphy decomposition, and the Cox calibration slope and intercept (`calibration.py`).
 - **Operating points**: one row per threshold with burden, sensitivity, PPV, and median warning time; selectors for the threshold that meets a sensitivity floor with the fewest alerts, or that fits an alert budget (`operating_points.py`).
+- **Uncertainty**: subject-level (cluster) bootstrap percentile intervals for every metric, and paired differences between two alert streams under the same resamples (`bootstrap.py`).
 
 ## Input conventions
 

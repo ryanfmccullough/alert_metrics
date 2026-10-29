@@ -6,6 +6,15 @@ operating-point tables. Textbook definitions with citations in each module.
 Nothing here is clinical advice; it is a scoring library.
 """
 
+from .bootstrap import (
+    SubjectSummary,
+    bootstrap_evaluate,
+    paired_difference,
+    paired_resamples,
+    percentile_interval,
+    resample_metrics,
+    subject_summary,
+)
 from .burden import (
     alerts_per_100_days,
     alerts_per_subject_day,
@@ -41,17 +50,14 @@ from .operating_points import (
 from .refractory import apply_refractory, persistence_mask, refractory_mask, threshold_alerts
 from .streams import Columns, check_alerts, check_events, check_observation, inside_observation
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 __all__ = [
-    "Columns",
-    "Matched",
-    "ReliabilityBins",
-    "__version__",
     "alert_ppv",
     "alerts_per_100_days",
     "alerts_per_subject_day",
     "apply_refractory",
+    "bootstrap_evaluate",
     "brier_decomposition",
     "brier_score",
     "calibration_slope_intercept",
@@ -59,6 +65,7 @@ __all__ = [
     "check_alerts",
     "check_events",
     "check_observation",
+    "Columns",
     "count_alerts",
     "evaluate_alerts",
     "event_sensitivity",
@@ -66,16 +73,25 @@ __all__ = [
     "false_alerts",
     "inside_observation",
     "match_alerts_to_events",
+    "Matched",
     "median_warning_time",
     "observed_days",
     "observed_hours",
     "operating_point_table",
+    "paired_difference",
+    "paired_resamples",
+    "percentile_interval",
     "persistence_mask",
     "ppv_at_sensitivity",
     "refractory_mask",
     "reliability_bins",
+    "ReliabilityBins",
+    "resample_metrics",
+    "subject_summary",
+    "SubjectSummary",
     "threshold_alerts",
     "threshold_at_alert_budget",
     "threshold_at_sensitivity",
+    "__version__",
     "warning_times",
 ]

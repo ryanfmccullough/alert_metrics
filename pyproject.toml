@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "alert_metrics"
-version = "0.1.1"
+version = "0.1.2"
 description = "Event-level evaluation of continuous early-warning scores: alarm burden, warning time, refractory suppression, calibration, and operating points"
 readme = "README.md"
 requires-python = ">=3.10"
