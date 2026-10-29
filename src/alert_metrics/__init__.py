@@ -41,7 +41,7 @@ from .operating_points import (
 from .refractory import apply_refractory, persistence_mask, refractory_mask, threshold_alerts
 from .streams import Columns, check_alerts, check_events, check_observation, inside_observation
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "Columns",
